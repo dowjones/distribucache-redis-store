@@ -49,7 +49,7 @@ keyspace notifications, which are used to support the `populateIn` feature in a
 way that multiple Distribucache clients would not conflict with each other while
 automatically populating the cache.  Disable this to avoid a warning if you're
 running Redis in an environment where `CONFIG` is not available.
-One such environment is AWS; where you will need to set the `notify-keyspace-events`
+One such environment is AWS. There you will need to set the `notify-keyspace-events`
 property to `Kx` manually through the AWS Management Console.
 
 In addition to the config above, all of the options defined in the
