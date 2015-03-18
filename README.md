@@ -1,4 +1,4 @@
-# Distribucache Redis Store
+# Distribucache Redis Store [![Build Status](https://secure.travis-ci.org/areusjs/distribucache-redis-store.png)](http://travis-ci.org/areusjs/distribucache-redis-store) [![NPM version](https://badge.fury.io/js/distribucache-redis-store.svg)](http://badge.fury.io/js/distribucache-redis-store)
 
 A Redis datastore for the [Distribucache](https://github.com/areusjs/distribucache) auto-repopulating cache.
 
