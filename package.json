@@ -2,6 +2,11 @@
   "name": "distribucache-redis-store",
   "version": "1.0.0",
   "description": "Redis-backed Distribucache Store",
+  "keywords": [
+    "distribucache",
+    "cache",
+    "redis"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/areusjs/distribucache-redis-store.git"
