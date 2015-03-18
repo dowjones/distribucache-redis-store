@@ -15,6 +15,7 @@ var distribucache = require('distribucache'),
     port: 6379
   })),
 
+  model = require('../model'), // for example
   cache,
   Service;
 
