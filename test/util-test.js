@@ -42,6 +42,20 @@ describe('datastore/redis/util', function () {
       util.ensureKeyspaceNotifications(client, check);
     });
 
+    it('should warn if Redis version does not support keyspace events', function (done) {
+      function check(err, response) {
+        if (err) return done(err);
+        response.should.equal('NOT CONFIGURED');
+        console.warn.firstCall.args[0].should.match(/Redis >=2.8.0/);
+        console.warn.restore();
+        done();
+      }
+      stub(console, 'warn');
+      client.config.withArgs('get', 'notify-keyspace-events').yields(null, []);
+      client.config.withArgs('set', 'notify-keyspace-events', 'Kx').yields(null, 'ok');
+      util.ensureKeyspaceNotifications(client, check);
+    });
+
     it('should set keyspace and expired notifications and emit expired', function (done) {
       function check(err, response) {
         if (err) return done(err);
