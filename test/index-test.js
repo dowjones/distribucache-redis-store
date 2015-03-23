@@ -3,7 +3,8 @@ var proxyquire = require('proxyquire'),
   should = require('should');
 
 describe('RedisStore', function () {
-  var redisStore, unit, lock, util, redisClient;
+  var redisStore, unit, lock,
+    util, redisClient;
 
   beforeEach(function () {
     var lockr;
@@ -29,9 +30,14 @@ describe('RedisStore', function () {
 
     util.createRedisClient.returns(redisClient);
 
+    function Timer(client, config, nsp) {
+      this.nsp = nsp;
+    }
+
     redisStore = proxyquire('../lib', {
       'redis-lockr': lockr,
-      './util': util
+      './util': util,
+      './Timer': Timer
     });
 
     unit = new redisStore();
@@ -102,14 +108,15 @@ describe('RedisStore', function () {
     testHset('setValue', done);
   });
 
-  it('should set timeout', function (done) {
-    redisClient.psetex.yields(null, 'ok');
-    unit.setTimeout('k', 1, function (err) {
-      if (err) return done(err);
-      arguments.length.should.equal(1);
-      redisClient.psetex.calledOnce.should.be.ok;
-      done();
-    });
+  it('should get a namespaced timer', function () {
+    var t = unit.createTimer('b');
+    t.nsp.should.eql('b');
+  });
+
+  it('should get a store and timer namespaced timer', function () {
+    unit = redisStore({namespace: 'n'});
+    var t = unit.createTimer('b');
+    t.nsp.should.eql('n:b');
   });
 
   describe('createLease', function () {
