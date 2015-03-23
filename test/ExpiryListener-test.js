@@ -10,7 +10,7 @@ describe('ExpiryListener', function () {
       config: noop, on: noop,
       psubscribe: noop, punsubscribe: noop
     });
-    unit = new ExpiryListener(client, {keyspace: 'k'});
+    unit = new ExpiryListener(client, {keyspace: 'nsp:*:trigger'});
   });
 
   it('should throw an invalidate error if no keyspace provided', function () {
@@ -28,10 +28,11 @@ describe('ExpiryListener', function () {
     it('should call _onExpiry on expiry event', function (done) {
       unit.listen();
       unit.on('expired', function (key) {
-        key.should.equal('a');
+        key.should.equal('s:g:a');
         done();
       });
-      client.on.lastCall.args[1]('__keyspace@0__:k', 'a:b', 'expired');
+      client.on.lastCall.args[1]('__keyspace@0__:nsp:*:trigger',
+        '__keyspace@0__:nsp:s:g:a:trigger', 'expired');
     });
 
     it('should not emit an expired event if message not "expired"', function () {

@@ -1,6 +1,6 @@
 {
   "name": "distribucache-redis-store",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Redis-backed Distribucache Store",
   "keywords": [
     "distribucache",
@@ -16,7 +16,7 @@
   "scripts": {
     "test": "sh -c 'npm run test-cover && istanbul check-coverage --statements 95 --functions 95 --branches 95 --lines 95'",
     "test-cover": "istanbul cover _mocha -- -r should --recursive",
-    "test-watch": "mocha -r should --recursive -w -R min"
+    "test-watch": "mocha -r should --recursive -w -R min -t 20"
   },
   "dependencies": {
     "common-errors": "^0.4.18",
