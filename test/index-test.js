@@ -21,6 +21,7 @@ describe('RedisStore', function () {
 
     redisClient = stub({
       del: noop,
+      pexpire: noop,
       hget: noop,
       hset: noop,
       psetex: noop,
@@ -58,9 +59,19 @@ describe('RedisStore', function () {
     });
   });
 
+  it('should expire', function (done) {
+    redisClient.pexpire.withArgs('k', 7).yields(null, 'ok');
+    unit.expire('k', 7, function (err) {
+      if (err) return done(err);
+      arguments.length.should.equal(1);
+      redisClient.pexpire.calledOnce.should.be.ok;
+      done();
+    });
+  });
+
   it('should proxy redis errors', function (done) {
     redisClient.hget.withArgs('k').yields(new Error('bad'));
-    unit.getAccessedAt('k', function (err) {
+    unit.get('k', 'f', function (err) {
       err.message.should.equal('bad');
       done();
     });
@@ -77,35 +88,23 @@ describe('RedisStore', function () {
   });
 
   it('should get accessedAt', function (done) {
-    testHget('getAccessedAt', '123', 123, done);
-  });
-
-  it('should get createdAt', function (done) {
-    testHget('getCreatedAt', '321', 321, done);
-  });
-
-  it('should get hash', function (done) {
-    testHget('getHash', '32', '32', done);
-  });
-
-  it('should get value', function (done) {
-    testHget('getValue', '32', '32', done);
-  });
-
-  it('should set accessedAt', function (done) {
-    testHset('setAccessedAt', done);
-  });
-
-  it('should set createdAt', function (done) {
-    testHset('setCreatedAt', done);
-  });
-
-  it('should set hash', function (done) {
-    testHset('setHash', done);
+    redisClient.hget.withArgs('g').yields(null, 'i');
+    unit.get('g', 'f', function (err, data) {
+      if (err) return done(err);
+      data.should.equal('i');
+      redisClient.hget.calledOnce.should.be.ok;
+      done();
+    });
   });
 
   it('should set value', function (done) {
-    testHset('setValue', done);
+    redisClient.hset.withArgs('g').yields(null, 'ok');
+    unit.set('g', 'f', 'v', function (err) {
+      if (err) return done(err);
+      arguments.length.should.equal(1);
+      redisClient.hset.calledOnce.should.be.ok;
+      done();
+    });
   });
 
   it('should get a namespaced timer', function () {
@@ -159,25 +158,5 @@ describe('RedisStore', function () {
       storeNsp._getKey(key).should.equal('n:k');
     });
   });
-
-  function testHget(methodName, input, output, cb) {
-    redisClient.hget.withArgs('g').yields(null, input);
-    unit[methodName]('g', function (err, data) {
-      if (err) return cb(err);
-      data.should.equal(output);
-      redisClient.hget.calledOnce.should.be.ok;
-      cb();
-    });
-  }
-
-  function testHset(methodName, cb) {
-    redisClient.hset.withArgs('g').yields(null, 'ok');
-    unit[methodName]('g', 'v', function (err) {
-      if (err) return cb(err);
-      arguments.length.should.equal(1);
-      redisClient.hset.calledOnce.should.be.ok;
-      cb();
-    });
-  }
 });
 
