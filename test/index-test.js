@@ -24,6 +24,8 @@ describe('RedisStore', function () {
       pexpire: noop,
       hget: noop,
       hset: noop,
+      hdel: noop,
+      hincrby: noop,
       psetex: noop,
       on: noop,
       psubscribe: noop
@@ -71,7 +73,7 @@ describe('RedisStore', function () {
 
   it('should proxy redis errors', function (done) {
     redisClient.hget.withArgs('k').yields(new Error('bad'));
-    unit.get('k', 'f', function (err) {
+    unit.getProp('k', 'f', function (err) {
       err.message.should.equal('bad');
       done();
     });
@@ -87,9 +89,9 @@ describe('RedisStore', function () {
     call.args[1](new Error('good'));
   });
 
-  it('should get accessedAt', function (done) {
+  it('should get property', function (done) {
     redisClient.hget.withArgs('g').yields(null, 'i');
-    unit.get('g', 'f', function (err, data) {
+    unit.getProp('g', 'f', function (err, data) {
       if (err) return done(err);
       data.should.equal('i');
       redisClient.hget.calledOnce.should.be.ok;
@@ -97,12 +99,32 @@ describe('RedisStore', function () {
     });
   });
 
-  it('should set value', function (done) {
+  it('should set property', function (done) {
     redisClient.hset.withArgs('g').yields(null, 'ok');
-    unit.set('g', 'f', 'v', function (err) {
+    unit.setProp('g', 'f', 'v', function (err) {
       if (err) return done(err);
       arguments.length.should.equal(1);
       redisClient.hset.calledOnce.should.be.ok;
+      done();
+    });
+  });
+
+  it('should increment property', function (done) {
+    redisClient.hincrby.withArgs('g', 'f', 10).yields(null, 11);
+    unit.incrPropBy('g', 'f', 10, function (err, updatedValue) {
+      if (err) return done(err);
+      updatedValue.should.equal(11);
+      redisClient.hincrby.calledOnce.should.be.ok;
+      done();
+    });
+  });
+
+  it('should delete property', function (done) {
+    redisClient.hdel.withArgs('g').yields(null, 'ok');
+    unit.delProp('g', 'f', function (err) {
+      if (err) return done(err);
+      arguments.length.should.equal(1);
+      redisClient.hdel.calledOnce.should.be.ok;
       done();
     });
   });
