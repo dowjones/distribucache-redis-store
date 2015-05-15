@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/areusjs/distribucache-redis-store.git"
+    "url": "git://github.com/dowjones/distribucache-redis-store.git"
   },
   "author": "nemtsov@gmail.com",
   "main": "./lib",
