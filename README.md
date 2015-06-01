@@ -42,6 +42,7 @@ Possible `config` values below.
 ```
 {String} [config.namespace]
 {Boolean} [config.isPreconfigured] defaults to false (see note below)
+{Object} [config.options] see node_redis options (sets return_buffers=true)
 ```
 
 `isPreconfigured` is used to determine whether the store needs to set-up
