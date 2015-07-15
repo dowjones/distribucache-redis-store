@@ -1,6 +1,6 @@
 {
   "name": "distribucache-redis-store",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Redis-backed Distribucache Store",
   "keywords": [
     "distribucache",

@@ -35,6 +35,16 @@ describe('ExpiryListener', function () {
         '__keyspace@0__:nsp:s:g:a:trigger', 'expired');
     });
 
+    it('should work with buffers if in that mode', function (done) {
+      unit.listen();
+      unit.on('expired', function (key) {
+        key.should.equal('s:g:a');
+        done();
+      });
+      client.on.lastCall.args[1]('__keyspace@0__:nsp:*:trigger',
+        '__keyspace@0__:nsp:s:g:a:trigger', new Buffer('expired'));
+    });
+
     it('should not emit an expired event if message not "expired"', function () {
       unit.listen();
       unit.on('expired', function (key) { throw new Error('called expired'); });
