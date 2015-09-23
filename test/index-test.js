@@ -1,6 +1,7 @@
+/* eslint new-cap: 0 */
+
 var proxyquire = require('proxyquire'),
-  stub = require('sinon').stub,
-  should = require('should');
+  stub = require('sinon').stub;
 
 describe('RedisStore', function () {
   var redisStore, unit, lock,
@@ -37,7 +38,7 @@ describe('RedisStore', function () {
       this.nsp = nsp;
     }
 
-    redisStore = proxyquire('../lib', {
+    redisStore = proxyquire('../src', {
       'redis-lockr': lockr,
       './util': util,
       './Timer': Timer
@@ -47,8 +48,8 @@ describe('RedisStore', function () {
   });
 
   it('should ensureKeyspaceNotifications if configured', function () {
-    var store = redisStore({isPreconfigured: true});
-    util.ensureKeyspaceNotifications.calledOnce.should.be.ok;
+    redisStore({isPreconfigured: true});
+    util.ensureKeyspaceNotifications.calledOnce.should.be.ok();
   });
 
   it('should del', function (done) {
@@ -56,7 +57,7 @@ describe('RedisStore', function () {
     unit.del('k', function (err) {
       if (err) return done(err);
       arguments.length.should.equal(1);
-      redisClient.del.calledOnce.should.be.ok;
+      redisClient.del.calledOnce.should.be.ok();
       done();
     });
   });
@@ -66,7 +67,7 @@ describe('RedisStore', function () {
     unit.expire('k', 7, function (err) {
       if (err) return done(err);
       arguments.length.should.equal(1);
-      redisClient.pexpire.calledOnce.should.be.ok;
+      redisClient.pexpire.calledOnce.should.be.ok();
       done();
     });
   });
@@ -94,7 +95,7 @@ describe('RedisStore', function () {
     unit.getProp('g', 'f', function (err, data) {
       if (err) return done(err);
       data.should.equal('i');
-      redisClient.hget.calledOnce.should.be.ok;
+      redisClient.hget.calledOnce.should.be.ok();
       done();
     });
   });
@@ -104,7 +105,7 @@ describe('RedisStore', function () {
     unit.setProp('g', 'f', 'v', function (err) {
       if (err) return done(err);
       arguments.length.should.equal(1);
-      redisClient.hset.calledOnce.should.be.ok;
+      redisClient.hset.calledOnce.should.be.ok();
       done();
     });
   });
@@ -114,7 +115,7 @@ describe('RedisStore', function () {
     unit.incrPropBy('g', 'f', 10, function (err, updatedValue) {
       if (err) return done(err);
       updatedValue.should.equal(11);
-      redisClient.hincrby.calledOnce.should.be.ok;
+      redisClient.hincrby.calledOnce.should.be.ok();
       done();
     });
   });
@@ -124,7 +125,7 @@ describe('RedisStore', function () {
     unit.delProp('g', 'f', function (err) {
       if (err) return done(err);
       arguments.length.should.equal(1);
-      redisClient.hdel.calledOnce.should.be.ok;
+      redisClient.hdel.calledOnce.should.be.ok();
       done();
     });
   });
@@ -147,7 +148,7 @@ describe('RedisStore', function () {
       lease('k', function (err, release) {
         if (err) return done(err);
         release();
-        lock.calledOnce.should.be.ok;
+        lock.calledOnce.should.be.ok();
         done();
       });
     });

@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 var redis = require('redis'),
   KEYSPACE_WARNING = '[distribucache] could not check and ' +
     '"set notify-keyspace-events Kx". ';

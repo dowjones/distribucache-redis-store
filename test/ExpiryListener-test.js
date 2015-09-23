@@ -1,8 +1,9 @@
 var stub = require('sinon').stub,
-  ExpiryListener = require('../lib/ExpiryListener');
+  ExpiryListener = require('../src/ExpiryListener'),
+  should = require('should');
 
 describe('ExpiryListener', function () {
-  var unit, noop, client;
+  var unit, client;
 
   beforeEach(function () {
     function noop() {}
@@ -14,15 +15,21 @@ describe('ExpiryListener', function () {
   });
 
   it('should throw an invalidate error if no keyspace provided', function () {
-    (function () { new ExpiryListener(client, {}); }).should.throw(/keyspace/);
-    (function () { new ExpiryListener(client); }).should.throw(/keyspace/);
+    var listener;
+    (function () {
+      listener = new ExpiryListener(client, {});
+    }).should.throw(/keyspace/);
+    (function () {
+      listener = new ExpiryListener(client);
+    }).should.throw(/keyspace/);
+    should(listener).not.be.ok();
   });
 
   describe('listen', function () {
     it('should subscribe to message', function () {
       unit.listen();
-      client.psubscribe.calledOnce.should.be.ok;
-      client.on.calledOnce.should.be.ok;
+      client.psubscribe.calledOnce.should.be.ok();
+      client.on.calledOnce.should.be.ok();
     });
 
     it('should call _onExpiry on expiry event', function (done) {
@@ -47,13 +54,17 @@ describe('ExpiryListener', function () {
 
     it('should not emit an expired event if message not "expired"', function () {
       unit.listen();
-      unit.on('expired', function (key) { throw new Error('called expired'); });
+      unit.on('expired', function () {
+        throw new Error('called expired');
+      });
       client.on.lastCall.args[1]('__keyspace@0__:k', 'a:b', 'del');
     });
 
     it('should not emit an expired event if wrong channel', function () {
       unit.listen();
-      unit.on('expired', function (key) { throw new Error('called expired'); });
+      unit.on('expired', function () {
+        throw new Error('called expired');
+      });
       client.on.lastCall.args[1]('__keyspace@0__:z', '', '');
     });
   });

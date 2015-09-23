@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 var stub = require('sinon').stub,
   proxyquire = require('proxyquire');
 
@@ -8,7 +10,7 @@ describe('datastore/redis/util', function () {
 
   beforeEach(function () {
     redis = stub({createClient: noop});
-    util = proxyquire('../lib/util', {
+    util = proxyquire('../src/util', {
       redis: redis
     });
   });
@@ -34,7 +36,7 @@ describe('datastore/redis/util', function () {
       function check(err, response) {
         if (err) return done(err);
         response.should.equal('NOT CONFIGURED');
-        console.warn.calledOnce.should.be.ok;
+        console.warn.calledOnce.should.be.ok();
         console.warn.restore();
         done();
       }

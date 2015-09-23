@@ -6,4 +6,4 @@ var requireDirectory = require('require-directory');
  * Include all newly created source directories here.
  */
 
-module.exports = requireDirectory(module, '../lib');
+module.exports = requireDirectory(module, '../src');

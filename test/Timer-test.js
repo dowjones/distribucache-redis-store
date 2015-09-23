@@ -1,6 +1,5 @@
 var proxyquire = require('proxyquire'),
-  stub = require('sinon').stub,
-  should = require('should');
+  stub = require('sinon').stub;
 
 describe('Timer', function () {
   var Timer, util, redisClient;
@@ -12,11 +11,13 @@ describe('Timer', function () {
     util = stub({createRedisClient: noop});
     util.createRedisClient.returns(redisClient);
 
-    function Listener(client, config) { this.config = config; }
+    function Listener(client, config) {
+      this.config = config;
+    }
     Listener.prototype.on = stub();
     Listener.prototype.listen = stub();
 
-    Timer = proxyquire('../lib/Timer', {
+    Timer = proxyquire('../src/Timer', {
       './util': util,
       './ExpiryListener': Listener
     });
@@ -26,7 +27,7 @@ describe('Timer', function () {
     var t = new Timer(redisClient, {}, 'n');
 
     function check() {
-      redisClient.psetex.calledOnce.should.be.ok;
+      redisClient.psetex.calledOnce.should.be.ok();
       done();
     }
 
