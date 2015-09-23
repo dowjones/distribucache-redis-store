@@ -1,8 +1,6 @@
 import joi from 'joi';
 import {EventEmitter} from 'events';
 
-module.exports = ExpiryListener;
-
 /**
  * Listen to expiring keys in Redis
  *

@@ -1,9 +1,9 @@
 /* eslint no-console: 0 */
 
-var redis = require('redis'),
-  KEYSPACE_WARNING = '[distribucache] could not check and ' +
-    '"set notify-keyspace-events Kx". ';
+import redis from 'redis';
 
+const KEYSPACE_WARNING = '[distribucache] could not check and ' +
+    '"set notify-keyspace-events Kx". ';
 
 /**
  * Set the 'notify-keyspace-events' config in Redis
@@ -12,7 +12,7 @@ var redis = require('redis'),
  * @param {Function} cb
  */
 
-exports.ensureKeyspaceNotifications = function (client, cb) {
+export function ensureKeyspaceNotifications(client, cb) {
   function maybeSet(err, config) {
     if (err) {
       if (!/unknown command 'config'/.test(err.message)) return cb(err);
@@ -26,7 +26,7 @@ exports.ensureKeyspaceNotifications = function (client, cb) {
       return cb(null, 'NOT CONFIGURED');
     }
 
-    var cfg = config[1].toString(); // e.g., 0 -> "notify-keyspace-events", 1 -> "xK"
+    let cfg = config[1].toString(); // e.g., 0 -> "notify-keyspace-events", 1 -> "xK"
     if (cfg.indexOf('K') > -1 && cfg.indexOf('x') > -1) return cb(null, 'CONFIGURED');
     if (cfg.indexOf('K') === -1) cfg += 'K'; // keyspace events
     if (cfg.indexOf('x') === -1) cfg += 'x'; // notify on expire
@@ -35,7 +35,7 @@ exports.ensureKeyspaceNotifications = function (client, cb) {
   }
 
   client.config('get', 'notify-keyspace-events', maybeSet);
-};
+}
 
 /**
  * Create a new Redis client
@@ -46,16 +46,16 @@ exports.ensureKeyspaceNotifications = function (client, cb) {
  * @param {String} [cfg.password]
  */
 
-exports.createRedisClient = function (cfg) {
+export function createRedisClient(cfg) {
   cfg = cfg || {};
   cfg.port = cfg.port || 6379;
   cfg.host = cfg.host || 'localhost';
   cfg.options = cfg.options || {};
   cfg.options.return_buffers = true;
-  var client = redis.createClient(cfg.port, cfg.host, cfg.options);
+  const client = redis.createClient(cfg.port, cfg.host, cfg.options);
   if (cfg.password) client.auth(cfg.password);
   return client;
-};
+}
 
 /**
  * Helper to be passed to functions
@@ -66,12 +66,10 @@ exports.createRedisClient = function (cfg) {
  * @returns {Function} (err)
  */
 
-exports.logError = function (logger) {
+export function logError(logger) {
   logger = logger || console;
-  return function (err) {
-    if (err) return logger.error(err);
-  };
-};
+  return err => err && logger.error(err);
+}
 
 /**
  * Proxy all redis events to the
@@ -82,14 +80,10 @@ exports.logError = function (logger) {
  * @param {String} eventName
  */
 
-exports.proxyEvent = function (eventEmitter, eventName) {
-  return function (data) {
-    eventEmitter.emit(eventName, data);
-  };
-};
+export function proxyEvent(eventEmitter, eventName) {
+  return data => eventEmitter.emit(eventName, data);
+}
 
-exports.errorOrNothing = function (cb) {
-  return function (err) {
-    cb(err);
-  };
-};
+export function errorOrNothing(cb) {
+  return err => cb(err);
+}
