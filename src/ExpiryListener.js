@@ -1,7 +1,5 @@
-var defaults = require('lodash').defaults,
-  joi = require('joi'),
-  EventEmitter = require('events').EventEmitter,
-  inherits = require('util').inherits;
+import joi from 'joi';
+import {EventEmitter} from 'events';
 
 module.exports = ExpiryListener;
 
@@ -14,75 +12,74 @@ module.exports = ExpiryListener;
  *   - expire - called when a key expires
  *       arguments: ({String} key, {Function} unlock)
  *       call the 'unlock' function when done.
- *
- * @constructor
- * @param {RedisClient} subClient
- * @param {Object} [config]
- * @param {String} [config.keyspace]
  */
 
-function ExpiryListener(subClient, config) {
-  EventEmitter.call(this);
-  config = this._validateConfig(config || {});
-  this._subClient = subClient;
-  this._channel = '__keyspace@0__:' + config.keyspace;
-  this._patternRe = getPatternRe(this._channel);
-}
+export default class ExpiryListener extends EventEmitter {
+  /**
+   * @param {RedisClient} subClient
+   * @param {Object} [config]
+   * @param {String} [config.keyspace]
+   */
 
-inherits(ExpiryListener, EventEmitter);
-
-/**
- * Enable redis keyspace events and
- * subscribe to the trigger events
- */
-
-ExpiryListener.prototype.listen = function () {
-  var client = this._subClient;
-  client.psubscribe(this._channel);
-  client.on('pmessage', this._onExpiry.bind(this));
-  this.emit('listen');
-};
-
-/**
- * Stop listening to keyspace expiry events.
- */
-
-ExpiryListener.prototype.stopListening = function () {
-  var self = this;
-  function emitEvent(err) {
-    if (err) self.emit('error', err);
-    self.emit('stop');
+  constructor(subClient, config) {
+    super();
+    config = this._validateConfig(config || {});
+    this._subClient = subClient;
+    this._channel = '__keyspace@0__:' + config.keyspace;
+    this._patternRe = getPatternRe(this._channel);
   }
-  this._subClient.punsubscribe(self._channel, emitEvent);
-};
 
-/**
- * Validate and set defaults on the config.
- * Throw if the config is invalid.
- */
+  /**
+   * Enable redis keyspace events and
+   * subscribe to the trigger events
+   */
 
-ExpiryListener.prototype._validateConfig = function (config) {
-  var validation = joi.validate(config, joi.object().keys({
-    keyspace: joi.string().required()
-  }));
-  if (validation.error) throw validation.error;
-  return validation.value;
-};
+  listen() {
+    const client = this._subClient;
+    client.psubscribe(this._channel);
+    client.on('pmessage', this._onExpiry.bind(this));
+    this.emit('listen');
+  }
 
-/**
- * On every event, emit the `expired` event with the key
- */
+  /**
+   * Stop listening to keyspace expiry events.
+   */
 
-ExpiryListener.prototype._onExpiry = function (pattern, channel, message) {
-  var key;
+  stopListening() {
+    this._subClient.punsubscribe(this._channel, err => {
+      if (err) this.emit('error', err);
+      this.emit('stop');
+    });
+  }
 
-  if ('expired' !== message.toString() ||
-      this._channel !== pattern) return;
+  /**
+   * Validate and set defaults on the config.
+   * Throw if the config is invalid.
+   */
 
-  key = channel.match(this._patternRe)[1];
+  _validateConfig(config) {
+    const validation = joi.validate(config, joi.object().keys({
+      keyspace: joi.string().required()
+    }));
+    if (validation.error) throw validation.error;
+    return validation.value;
+  }
 
-  this.emit('expired', key);
-};
+  /**
+   * On every event, emit the `expired` event with the key
+   */
+
+  _onExpiry(pattern, channel, message) {
+    let key;
+
+    if (message.toString() !== 'expired' ||
+        this._channel !== pattern) return;
+
+    key = channel.match(this._patternRe)[1];
+
+    this.emit('expired', key);
+  }
+}
 
 function getPatternRe(pattern) {
   return new RegExp(pattern.replace('*', '(.*)'));

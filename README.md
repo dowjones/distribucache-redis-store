@@ -7,30 +7,27 @@ A Redis datastore for the [Distribucache](https://github.com/dowjones/distribuca
 Here's what a simple service using Distribucache with Redis may look like:
 
 ```js
-var distribucache = require('distribucache'),
-  redisStore = require('distribucache-redis-store'),
+import distribucache from 'distribucache';
+import redisStore from 'distribucache-redis-store';
+import model from '../model'; // for example
 
-  cacheClient = distribucache.createClient(redisStore({
-    host: 'localhost',
-    port: 6379
-  })),
+const store = redisStore({host: 'localhost', port: 6379});
+const cacheClient = distribucache.createClient(store);
 
-  model = require('../model'), // for example
-  cache,
-  Service;
-
-cache = cacheClient.create('my:values', {
+const cache = cacheClient.create('my:values', {
   staleIn: '10 sec',
   populateIn: '5 sec',
   pausePopulateIn: '1 min',
-  populate: function (key, cb) {
+  populate(key, cb) {
     model.get(key, cb);
   }
 });
 
-Service.get = function (key, cb) {
-  cache.get(key, cb);
-};
+class Service {
+  get(key, cb) {
+    cache.get(key, cb);
+  }
+}
 ```
 
 

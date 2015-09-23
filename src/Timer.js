@@ -1,37 +1,30 @@
-var EventEmitter = require('events').EventEmitter,
-  inherits = require('util').inherits,
-  ExpiryListener = require('./ExpiryListener'),
-  util = require('./util'),
-  proxyEvent = util.proxyEvent,
-  errorOrNothing = util.errorOrNothing,
-  Timer;
+import {EventEmitter} from 'events';
+import ExpiryListener from './ExpiryListener';
+import {createRedisClient, proxyEvent, errorOrNothing} from './util';
 
-module.exports = Timer;
+export default class Timer extends EventEmitter {
+  constructor(pubClient, redisConfig, namespace) {
+    super();
 
-function Timer(pubClient, redisConfig, namespace) {
-  var listener, listenerConfig;
-  EventEmitter.call(this);
+    this._namespace = namespace + ':';
+    this._pubClient = pubClient;
 
-  this._namespace = namespace + ':';
-  this._pubClient = pubClient;
+    this._subClient = createRedisClient(redisConfig);
+    this._subClient.on('error', proxyEvent(this, 'error'));
 
-  this._subClient = util.createRedisClient(redisConfig);
-  this._subClient.on('error', proxyEvent(this, 'error'));
+    const listenerConfig = {keyspace: this._namespace + '*:trigger'};
+    const listener = new ExpiryListener(this._subClient, listenerConfig);
+    listener.on('error', proxyEvent(this, 'error'));
+    listener.on('expired', proxyEvent(this, 'timeout'));
+    listener.listen();
+  }
 
-  listenerConfig = {keyspace: this._namespace + '*:trigger'};
-  listener = new ExpiryListener(this._subClient, listenerConfig);
-  listener.on('error', proxyEvent(this, 'error'));
-  listener.on('expired', proxyEvent(this, 'timeout'));
-  listener.listen();
+  setTimeout(key, ttl, cb) {
+    this._pubClient.psetex(this._getKey(key) + ':trigger',
+      ttl, '', errorOrNothing(cb));
+  }
+
+  _getKey(key) {
+    return this._namespace + key;
+  }
 }
-
-inherits(Timer, EventEmitter);
-
-Timer.prototype.setTimeout = function (key, ttl, cb) {
-  this._pubClient.psetex(this._getKey(key) + ':trigger',
-    ttl, '', errorOrNothing(cb));
-};
-
-Timer.prototype._getKey = function (key) {
-  return this._namespace + key;
-};

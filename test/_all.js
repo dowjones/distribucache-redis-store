@@ -1,4 +1,4 @@
-var requireDirectory = require('require-directory');
+import requireDirectory from 'require-directory';
 
 
 /**
@@ -6,4 +6,4 @@ var requireDirectory = require('require-directory');
  * Include all newly created source directories here.
  */
 
-module.exports = requireDirectory(module, '../src');
+export default requireDirectory(module, '../src');

@@ -1,40 +1,42 @@
-var stub = require('sinon').stub,
-  ExpiryListener = require('../src/ExpiryListener'),
-  should = require('should');
+import {stub} from 'sinon';
+import ExpiryListener from '../src/ExpiryListener';
+import should from 'should';
 
-describe('ExpiryListener', function () {
+describe('ExpiryListener', () => {
   var unit, client;
 
-  beforeEach(function () {
+  beforeEach(() => {
     function noop() {}
     client = stub({
       config: noop, on: noop,
       psubscribe: noop, punsubscribe: noop
     });
-    unit = new ExpiryListener(client, {keyspace: 'nsp:*:trigger'});
+    unit = new ExpiryListener(client, {
+      keyspace: 'nsp:*:trigger'
+    });
   });
 
-  it('should throw an invalidate error if no keyspace provided', function () {
+  it('should throw an invalidate error if no keyspace provided', () => {
     var listener;
-    (function () {
+    (() => {
       listener = new ExpiryListener(client, {});
     }).should.throw(/keyspace/);
-    (function () {
+    (() => {
       listener = new ExpiryListener(client);
     }).should.throw(/keyspace/);
     should(listener).not.be.ok();
   });
 
-  describe('listen', function () {
-    it('should subscribe to message', function () {
+  describe('listen', () => {
+    it('should subscribe to message', () => {
       unit.listen();
       client.psubscribe.calledOnce.should.be.ok();
       client.on.calledOnce.should.be.ok();
     });
 
-    it('should call _onExpiry on expiry event', function (done) {
+    it('should call _onExpiry on expiry event', done => {
       unit.listen();
-      unit.on('expired', function (key) {
+      unit.on('expired', key => {
         key.should.equal('s:g:a');
         done();
       });
@@ -42,9 +44,9 @@ describe('ExpiryListener', function () {
         '__keyspace@0__:nsp:s:g:a:trigger', 'expired');
     });
 
-    it('should work with buffers if in that mode', function (done) {
+    it('should work with buffers if in that mode', done => {
       unit.listen();
-      unit.on('expired', function (key) {
+      unit.on('expired', key => {
         key.should.equal('s:g:a');
         done();
       });
@@ -52,32 +54,32 @@ describe('ExpiryListener', function () {
         '__keyspace@0__:nsp:s:g:a:trigger', new Buffer('expired'));
     });
 
-    it('should not emit an expired event if message not "expired"', function () {
+    it('should not emit an expired event if message not "expired"', () => {
       unit.listen();
-      unit.on('expired', function () {
+      unit.on('expired', () => {
         throw new Error('called expired');
       });
       client.on.lastCall.args[1]('__keyspace@0__:k', 'a:b', 'del');
     });
 
-    it('should not emit an expired event if wrong channel', function () {
+    it('should not emit an expired event if wrong channel', () => {
       unit.listen();
-      unit.on('expired', function () {
+      unit.on('expired', () => {
         throw new Error('called expired');
       });
       client.on.lastCall.args[1]('__keyspace@0__:z', '', '');
     });
   });
 
-  describe('stopListening', function () {
-    it('should send an unsubscribe and emit a stop', function (done) {
+  describe('stopListening', () => {
+    it('should send an unsubscribe and emit a stop', done => {
       unit.on('stop', done);
       client.punsubscribe.yields(null);
       unit.stopListening();
     });
 
-    it('should emit an error on unsubscribe error', function (done) {
-      unit.on('error', function (err) {
+    it('should emit an error on unsubscribe error', done => {
+      unit.on('error', err => {
         err.message.should.equal('bad');
         done();
       });

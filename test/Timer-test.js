@@ -1,10 +1,10 @@
-var proxyquire = require('proxyquire'),
-  stub = require('sinon').stub;
+import proxyquire from 'proxyquire';
+import {stub} from 'sinon';
 
-describe('Timer', function () {
-  var Timer, util, redisClient;
+describe('Timer', () => {
+  let Timer, util, redisClient;
 
-  beforeEach(function () {
+  beforeEach(() => {
     function noop() {}
 
     redisClient = stub({psetex: noop, on: noop});
@@ -23,8 +23,8 @@ describe('Timer', function () {
     });
   });
 
-  it('should setTimeout', function (done) {
-    var t = new Timer(redisClient, {}, 'n');
+  it('should setTimeout', done => {
+    const t = new Timer(redisClient, {}, 'n');
 
     function check() {
       redisClient.psetex.calledOnce.should.be.ok();
