@@ -39,7 +39,7 @@ Possible `config` values below.
 ```
 {String} [config.namespace]
 {Boolean} [config.isPreconfigured] defaults to false (see note below)
-{Object} [config.options] see node_redis options (sets return_buffers=true)
+{Object} [config.options] see ioredis options
 ```
 
 `isPreconfigured` is used to determine whether the store needs to set-up
@@ -50,8 +50,8 @@ running Redis in an environment where `CONFIG` is not available.
 One such environment is AWS. There you will need to set the `notify-keyspace-events`
 property to `Kx` manually through the AWS Management Console.
 
-In addition to the config above, all of the options defined in the
-[node\_redis#createClient()](https://github.com/mranney/node_redis#rediscreateclient)
+In addition to the config above, all of the options defined in
+[ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options)
 are allowed to configure the Redis client.
 
 

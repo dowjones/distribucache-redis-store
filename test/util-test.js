@@ -4,14 +4,15 @@ import {stub} from 'sinon';
 import proxyquire from 'proxyquire';
 
 describe('datastore/redis/util', () => {
-  let util, redis;
-
-  function noop () {}
+  let util, Redis;
 
   beforeEach(() => {
-    redis = stub({createClient: noop});
+    Redis = function (config) {
+      this.config = config;
+    };
+    Redis.prototype.isFakeRedisClient = () => true;
     util = proxyquire('../src/util', {
-      redis: redis
+      ioredis: Redis
     });
   });
 
@@ -97,13 +98,40 @@ describe('datastore/redis/util', () => {
 
   describe('createRedisClient', () => {
     it('should create a brand new redis client', () => {
-      redis.createClient.returns(stub({}));
-      util.createRedisClient().should.be.type('object');
+      const client = util.createRedisClient({d: 2});
+      client.isFakeRedisClient().should.be.ok();
+      client.config.d.should.eql(2);
     });
 
-    it('should create an authenticated redis client', () => {
-      redis.createClient.returns(stub({auth: noop}));
-      util.createRedisClient({password: 'p'}).should.be.type('object');
+    describe('with ability to reconnect on error', () => {
+      let re;
+
+      beforeEach(() => {
+        re = util.createRedisClient().config.reconnectOnError;
+      });
+
+      it('should not reconn un unknown errors', () => {
+        re({message: 'unknown'}).should.equal(false);
+      });
+
+      it('should reconn on READONLY errors', () => {
+        stub(console, 'warn');
+        re({message: 'blah -READONLY oh no'}).should.equal(2);
+        console.warn.calledOnce.should.be.ok();
+        console.warn.restore();
+      });
+
+      it('should reconn on user-provided errors', () => {
+        stub(console, 'warn');
+        re = util.createRedisClient({
+          reconnectOnError(err) {
+            return err.message === 'userprov';
+          }
+        }).config.reconnectOnError;
+        re({message: 'userprov'}).should.be.ok();
+        console.warn.calledOnce.should.be.ok();
+        console.warn.restore();
+      });
     });
   });
 

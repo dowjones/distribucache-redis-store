@@ -64,7 +64,7 @@ export default class RedisStore extends EventEmitter {
   }
 
   getProp(key, field, cb) {
-    this._client.hget(this._getKey(key), field, cb);
+    this._client.hgetBuffer(this._getKey(key), field, cb);
   }
 
   setProp(key, field, value, cb) {

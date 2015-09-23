@@ -1,9 +1,11 @@
 /* eslint no-console: 0 */
 
-import redis from 'redis';
+import Redis from 'ioredis';
 
 const KEYSPACE_WARNING = '[distribucache] could not check and ' +
     '"set notify-keyspace-events Kx". ';
+const RECONNECT_WARNING = '[distribucache] reconnecting redis ' +
+    'due to an error';
 
 /**
  * Set the 'notify-keyspace-events' config in Redis
@@ -48,13 +50,8 @@ export function ensureKeyspaceNotifications(client, cb) {
 
 export function createRedisClient(cfg) {
   cfg = cfg || {};
-  cfg.port = cfg.port || 6379;
-  cfg.host = cfg.host || 'localhost';
-  cfg.options = cfg.options || {};
-  cfg.options.return_buffers = true;
-  const client = redis.createClient(cfg.port, cfg.host, cfg.options);
-  if (cfg.password) client.auth(cfg.password);
-  return client;
+  addReconnectOnReadonly(cfg);
+  return new Redis(cfg);
 }
 
 /**
@@ -86,4 +83,27 @@ export function proxyEvent(eventEmitter, eventName) {
 
 export function errorOrNothing(cb) {
   return err => cb(err);
+}
+
+/**
+ * This is necessary for the store to handle the case when
+ * another master is selected in ElastiCache, while
+ * connecting to the Primary Endpoint.
+ *
+ * @see https://github.com/dowjones/distribucache-redis-store/issues/3
+ * @see https://github.com/luin/ioredis#reconnect-on-error
+ */
+
+function addReconnectOnReadonly(cfg) {
+  const noop = () => false;
+  const userReconn = (typeof cfg.reconnectOnError === 'function') ? cfg.reconnectOnError : noop;
+  cfg.reconnectOnError = err => {
+    const shouldReconnect = (isReadonlyError(err) || userReconn(err)) ? 2 : false;
+    if (shouldReconnect) console.warn(RECONNECT_WARNING);
+    return shouldReconnect;
+  };
+}
+
+function isReadonlyError(err) {
+  return /READONLY\b/.test(err.message);
 }

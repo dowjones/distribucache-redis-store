@@ -21,7 +21,7 @@ describe('RedisStore', () => {
     redisClient = stub({
       del: noop,
       pexpire: noop,
-      hget: noop,
+      hgetBuffer: noop,
       hset: noop,
       hdel: noop,
       hincrby: noop,
@@ -71,7 +71,7 @@ describe('RedisStore', () => {
   });
 
   it('should proxy redis errors', done => {
-    redisClient.hget.withArgs('k').yields(new Error('bad'));
+    redisClient.hgetBuffer.withArgs('k').yields(new Error('bad'));
     unit.getProp('k', 'f', err => {
       err.message.should.equal('bad');
       done();
@@ -89,11 +89,11 @@ describe('RedisStore', () => {
   });
 
   it('should get property', done => {
-    redisClient.hget.withArgs('g').yields(null, 'i');
+    redisClient.hgetBuffer.withArgs('g').yields(null, 'i');
     unit.getProp('g', 'f', (err, data) => {
       if (err) return done(err);
       data.should.equal('i');
-      redisClient.hget.calledOnce.should.be.ok();
+      redisClient.hgetBuffer.calledOnce.should.be.ok();
       done();
     });
   });
