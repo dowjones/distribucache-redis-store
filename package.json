@@ -1,6 +1,6 @@
 {
   "name": "distribucache-redis-store",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Redis-backed Distribucache Store",
   "keywords": [
     "distribucache",
@@ -27,7 +27,7 @@
     "ioredis": "^1.9.0",
     "joi": "^6.0.8",
     "lodash": "^3.5.0",
-    "redis-lockr": "0.0.1"
+    "redis-lockr": "0.1.0"
   },
   "devDependencies": {
     "babel": "^5.8.23",
