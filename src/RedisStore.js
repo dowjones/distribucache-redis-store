@@ -54,6 +54,10 @@ export default class RedisStore extends EventEmitter {
     const nsp = this._config.namespace + namespace;
     return new Timer(this._client, this._config, nsp);
   }
+  
+  quit() {
+    this._client.quit(errorOrNothing(cb));
+  }
 
   del(key, cb) {
     this._client.del(this._getKey(key), errorOrNothing(cb));
