@@ -51,9 +51,9 @@ describe('RedisStore', () => {
     util.ensureKeyspaceNotifications.calledOnce.should.be.ok();
   });
 
-  it('should quit', done=>{
+  it('should quit', done => {
     redisClient.quit.withArgs().yields(null, 'ok');
-    unit.quit(function(err){
+    unit.quit(function (err) {
       if (err) return done(err);
       redisClient.quit.calledOnce.should.be.ok();
       done();
