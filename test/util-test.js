@@ -103,6 +103,11 @@ describe('datastore/redis/util', () => {
       client.config.d.should.eql(2);
     });
 
+    // describe('with ability to quit', () => {
+    //   let r = util.createRedisClient();
+    //   r.quit();
+    // });
+
     describe('with ability to reconnect on error', () => {
       let re;
 
