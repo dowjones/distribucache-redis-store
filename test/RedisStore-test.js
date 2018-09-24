@@ -19,6 +19,7 @@ describe('RedisStore', () => {
     });
 
     redisClient = stub({
+      quit: noop,
       del: noop,
       pexpire: noop,
       hgetBuffer: noop,
@@ -48,6 +49,15 @@ describe('RedisStore', () => {
   it('should ensureKeyspaceNotifications if configured', () => {
     unit = new RedisStore({isPreconfigured: true});
     util.ensureKeyspaceNotifications.calledOnce.should.be.ok();
+  });
+
+  it('should quit', done => {
+    redisClient.quit.withArgs().yields(null, 'ok');
+    unit.quit(function (err) {
+      if (err) return done(err);
+      redisClient.quit.calledOnce.should.be.ok();
+      done();
+    })
   });
 
   it('should del', done => {
