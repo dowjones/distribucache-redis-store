@@ -1,5 +1,5 @@
 import {EventEmitter} from 'events';
-import assign from 'lodash/object/assign';
+import {assign} from 'lodash';
 import lockr from 'redis-lockr';
 import Timer from './Timer';
 import commonErrors from 'common-errors';
