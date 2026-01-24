@@ -26,7 +26,7 @@
     "common-errors": "^0.4.18",
     "ioredis": "^1.9.0",
     "joi": "^6.0.8",
-    "lodash": "4.17.20",
+    "lodash": "4.17.23",
     "redis-lockr": "0.1.0"
   },
   "devDependencies": {
